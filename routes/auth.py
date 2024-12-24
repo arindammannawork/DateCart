@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request,HTTPException,Header,Depends,status
-
+from typing import Annotated
 from schema import user_model
 from helper.helper_funtions import *
 from db import db
@@ -41,11 +41,5 @@ async def register(register_credentials:user_model):
 
 @router.get("/verifyuser")
 async def verify_user(jwt_token: str = Header(None)):
-    # 
-    if not jwt_token:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="jwt_token header missing")
-    if not jwt_token.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid jwt_token header format")
-    token=jwt_token.split(" ")[1]  # Extract the token after "Bearer "
-    payload = verify_jwt_token(token)
+    payload = verify_jwt_token(jwt_token)
     return {"message": "User verified successfully", "payload": payload,"status_code":status.HTTP_200_OK}

@@ -1,5 +1,5 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import HTTPException
+from fastapi import HTTPException,status,Header
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -18,7 +18,7 @@ def convert_objectid(doc):
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -45,9 +45,19 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 
-def verify_jwt_token(token):
+    
+def verify_jwt_token(jwt_token):
     try:
+        if not jwt_token:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="jwt_token header missing")
+        if not jwt_token.startswith("Bearer "):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid jwt_token header format")
+        token=jwt_token.split(" ")[1]  # Extract the token after "Bearer "
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except Exception as e:
         raise HTTPException(status_code=401, detail= f"Invalid token {e}") from e
+    
+
+async def get_token_headers(jwt_token: str = Header(None)):
+    return  verify_jwt_token(jwt_token)
