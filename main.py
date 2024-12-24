@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from config import *
 from helper.helper_funtions import *
-
+from fastapi.middleware.cors import CORSMiddleware
 from routes.auth import router as auth_router 
 
 
@@ -11,6 +11,7 @@ from routes.auth import router as auth_router
 
 
 app = FastAPI()
+# Allow CORS for Swagger testing if needed
 
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
 
