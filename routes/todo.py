@@ -1,9 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends,requests,Request
 
 
 router = APIRouter()
 
-@router.get("/todos")
 
-async def read_todos():
+
+
+
+def func(re:Request):
+    print(re.headers)
+    return "abc"
+@router.get("/todos")
+async def read_todos(q:str =Depends(func)):
     return {"message": "hello world"}

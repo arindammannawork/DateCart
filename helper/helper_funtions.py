@@ -1,11 +1,16 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import HTTPException,status,Header
+from fastapi import HTTPException,status,Header,Depends
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta, timezone
 from config import *
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+
+
+
 
 
 
@@ -44,20 +49,25 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
+# Define HTTPBearer for JWT Token
+security = HTTPBearer()
 
+# Dependency to extract and verify the token
+def get_token_headers(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials  # Extract the token
+    return verify_jwt_token(token)
     
 def verify_jwt_token(jwt_token):
     try:
         if not jwt_token:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="jwt_token header missing")
-        if not jwt_token.startswith("Bearer "):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid jwt_token header format")
-        token=jwt_token.split(" ")[1]  # Extract the token after "Bearer "
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # if not jwt_token.startswith("Bearer "):
+        #     print(jwt_token)
+        #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid jwt_token header format",token=jwt_token)
+        # token=jwt_token.split(" ")[1]  # Extract the token after "Bearer "
+        payload = jwt.decode(jwt_token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload
     except Exception as e:
         raise HTTPException(status_code=401, detail= f"Invalid token {e}") from e
     
 
-async def get_token_headers(jwt_token: str = Header(None)):
-    return  verify_jwt_token(jwt_token)

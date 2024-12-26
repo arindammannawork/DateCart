@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request,HTTPException,Header,Depends,status
 from typing import Annotated
-from schema import user_model
+from schema import User_model
 from helper.helper_funtions import *
 from db import db
 
@@ -8,7 +8,7 @@ from db import db
 router = APIRouter()
 
 @router.post("/login")
-async def login(login_credentials:user_model ):
+async def login(login_credentials:User_model ):
     # Authentication logic here
     user=  db.users.find_one({"email":login_credentials.email})
     user=convert_objectid(user)
@@ -20,10 +20,10 @@ async def login(login_credentials:user_model ):
     # Generate JWT token here
     token = create_access_token(data={"email": user["email"],})
     # return {"access_token": token, "token_type": "bearer"}
-    return {"message": "Login successful", "token": f"Barear {token}" ,"status_code":status.HTTP_200_OK}
+    return {"message": "Login successful", "token": f"Bearer {token}" ,"status_code":status.HTTP_200_OK}
 
 @router.post("/register")
-async def register(register_credentials:user_model):
+async def register(register_credentials:User_model):
     # Registration logic here
     user= db.users.find_one({"email":register_credentials.email})
     if user:
@@ -40,6 +40,5 @@ async def register(register_credentials:user_model):
 
 
 @router.get("/verifyuser")
-async def verify_user(jwt_token: str = Header(None)):
-    payload = verify_jwt_token(jwt_token)
-    return {"message": "User verified successfully", "payload": payload,"status_code":status.HTTP_200_OK}
+async def verify_user(payload:dict=Depends(get_token_headers)):
+    return {"message": "User verified successfully","payload":payload ,"status_code":status.HTTP_200_OK}
