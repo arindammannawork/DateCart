@@ -1,5 +1,5 @@
 from fastapi import FastAPI,Depends
-from config import *
+# from config import *
 from helper.helper_funtions import *
 from routes.auth import router as auth_router 
 from routes.todo import router as todo_router 

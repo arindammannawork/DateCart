@@ -5,7 +5,8 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta, timezone
-from config import *
+# from config import *
+import os
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
@@ -43,9 +44,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+        expire = datetime.now(timezone.utc) + timedelta(hours=os.getenv("ACCESS_TOKEN_EXPIRE_HOURS"))
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode,os.getenv("SECRET_KEY") , algorithm=os.getenv("ALGORITHM"))
     return encoded_jwt
 
 
@@ -65,7 +66,7 @@ def verify_jwt_token(jwt_token):
         #     print(jwt_token)
         #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid jwt_token header format",token=jwt_token)
         # token=jwt_token.split(" ")[1]  # Extract the token after "Bearer "
-        payload = jwt.decode(jwt_token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(jwt_token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
         return payload
     except Exception as e:
         raise HTTPException(status_code=401, detail= f"Invalid token {e}") from e
