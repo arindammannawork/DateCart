@@ -3,6 +3,7 @@ from fastapi import  UploadFile, File, HTTPException,APIRouter
 from dotenv import load_dotenv
 import boto3
 from botocore.exceptions import ClientError
+from helper.helper_funtions import extract_note_identifier
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,9 +30,9 @@ async def upload_to_s3(file: UploadFile = File(...)):
     """
     Uploads a file to the specified S3 bucket and returns its public URL.
     """
-    print(file)
+    # print(file)
     try:
-        # Define the S3 object key (file path in the bucket)
+        '''# Define the S3 object key (file path in the bucket)
         object_name = file.filename
 
         # Upload the file to S3
@@ -44,9 +45,10 @@ async def upload_to_s3(file: UploadFile = File(...)):
             "get_object",
             Params={"Bucket": AWS_BUCKET_NAME, "Key": object_name},
             ExpiresIn=3600  # 1 hour validity
-        )
-
-        return {"message": "File uploaded successfully", "file_url": file_url}
+        )'''
+        print(type(file.file))
+        note_number=await extract_note_identifier(file.file)
+        return {"message": "File uploaded successfully", "note_number": note_number}
 
     except ClientError as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {e}")

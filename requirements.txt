@@ -3,4 +3,7 @@ uvicorn
 pymongo[srv]
 pyjwt
 passlib[bcrypt]
-boto3
+boto3 
+opencv-python 
+pillow
+easyocr
