@@ -6,7 +6,6 @@ from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta, timezone
 import cv2
-import pytesseract
 from typing import Optional
 import os
 import numpy as np
@@ -17,7 +16,6 @@ from re import match
 import easyocr
 
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
 
@@ -84,9 +82,9 @@ def verify_jwt_token(jwt_token):
 # Configure Tesseract path if needed (Windows users)
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-def get_orientation(image):
+def get_orientation(img_path):
     # Open the image
-    image = Image.open(image)
+    image = Image.open(img_path)
     
     # Handle EXIF orientation if it exists
     try:
@@ -132,10 +130,10 @@ def display(image):
 def greyscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-async def extract_note_identifier(image) -> Optional[str]:
+async def extract_note_identifier(img_path) -> Optional[str]:
   
     try:
-        im_100rs=cv2.imread(image)
+        im_100rs=cv2.imread(img_path)
         if im_100rs is None:
             print("Error: Image not found or unable to load. Check the file path.")
             exit()
@@ -145,7 +143,7 @@ async def extract_note_identifier(image) -> Optional[str]:
 
 
 
-        orientation_obj= get_orientation(image)
+        orientation_obj= get_orientation(img_path)
         # print (orientation_obj.portrait)
         if orientation_obj["portrait"]:
             # Define the crop region (x, y, width, height)
@@ -203,6 +201,7 @@ async def extract_note_identifier(image) -> Optional[str]:
 
         noteNum=noteNum_firstpart[0] + " " + noteNum_scoendpart[0]
         print(noteNum)
+        return noteNum
 
     except Exception as e:
         return f"An error occurred: {e}"

@@ -24,33 +24,32 @@ s3_client = boto3.client(
     region_name=AWS_REGION
 )
 
+UPLOAD_FOLDER = "uploaded_files"
 
-@router.post("/upload-to-s3")
+# Ensure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+
+
+
+@router.post("/exract_number")
 async def upload_to_s3(file: UploadFile = File(...)):
-    """
-    Uploads a file to the specified S3 bucket and returns its public URL.
-    """
-    # print(file)
+    
     try:
-        '''# Define the S3 object key (file path in the bucket)
-        object_name = file.filename
-
-        # Upload the file to S3
-        s3_client.upload_fileobj(
-            file.file,  # File object from UploadFile
-            AWS_BUCKET_NAME,  # Target bucket name
-            object_name,  # S3 object name (key) # Set the file to be publicly readable
-        )
-        file_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": AWS_BUCKET_NAME, "Key": object_name},
-            ExpiresIn=3600  # 1 hour validity
-        )'''
-        print(type(file.file))
-        note_number=await extract_note_identifier(file.file)
+       
+        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
+        # file.save("uploaded_files/img.jpg")
+        note_number=await extract_note_identifier(file_path)
         return {"message": "File uploaded successfully", "note_number": note_number}
 
     except ClientError as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
+    finally:
+        # Delete the saved file after processing
+        if os.path.exists(file_path):
+            os.remove(file_path)
