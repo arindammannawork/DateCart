@@ -34,7 +34,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 @router.post("/exract_number")
-async def upload_to_s3(file: UploadFile = File(...)):
+async def exract_number(file: UploadFile = File(...)):
     
     try:
        
