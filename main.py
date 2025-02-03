@@ -4,6 +4,8 @@ import time
 from helper.helper_funtions import *
 from routes.auth import router as auth_router 
 from routes.bankNote import router as todo_router 
+import torch
+print(torch.cuda.is_available()) 
 
 
 # Create a new client and connect to the server
